@@ -4,7 +4,7 @@
 //
 
 import LibC
-import Swift
+import Math
 
 public struct Share<T: FixedWidthInteger> where T.Stride: SignedInteger {
 	public let index: T
@@ -22,12 +22,12 @@ public struct Share<T: FixedWidthInteger> where T.Stride: SignedInteger {
 			var accumulator = value
 			for exp in 1..<needed {
 				accumulator = accumulator
-					.add(coef[Int(truncatingIfNeeded: exp-1)]
-						.mul(T(x)
-							.pow(T(exp),
-								 mod: prime),
-							 mod: prime),
-						 mod: prime)
+					.adding(coef[Int(truncatingIfNeeded: exp-1)]
+						.multiplying(T(x)
+							.exponentiating(by: T(exp),
+								 modulo: prime),
+							 modulo: prime),
+						 modulo: prime)
 			}
 			let share = Share(index: T(x),
 							  value: accumulator)
@@ -48,24 +48,24 @@ public struct Share<T: FixedWidthInteger> where T.Stride: SignedInteger {
 				let startposition = shares[formula].index
 				let nextposition = shares[count].index
 				numerator = numerator
-					.mul(T(0)
-						.sub(nextposition,
-							 mod: prime),
-						 mod: prime)
+					.multiplying(T(0)
+						.subtracting(nextposition,
+							 modulo: prime),
+						 modulo: prime)
 				denominator = denominator
-					.mul(startposition
-						.sub(nextposition,
-							 mod: prime),
-						 mod: prime)
+					.multiplying(startposition
+						.subtracting(nextposition,
+							 modulo: prime),
+						 modulo: prime)
 			}
-			guard let inv = denominator.inv(prime) else { return nil }
+			guard let inv = denominator.inverse(modulo: prime) else { return nil }
 			accum = prime
-				.add(accum, mod: prime)
-				.add(shares[formula].value
-					.mul(numerator, mod: prime)
-					.mul(inv,
-						 mod: prime),
-					 mod: prime)
+				.adding(accum, modulo: prime)
+				.adding(shares[formula].value
+					.multiplying(numerator, modulo: prime)
+					.multiplying(inv,
+						 modulo: prime),
+					 modulo: prime)
 		}
 		return accum
 	}

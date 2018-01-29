@@ -30,6 +30,7 @@ func split() throws {
 	var input: String?
 	var output: String?
 	var security: Int?
+	var help = false
 	
 	let parser = ArgumentParser(strict: true)
 	parser.intOption(short: "c",
@@ -56,8 +57,17 @@ func split() throws {
 						description: "Input file") { input = $0 }
 	parser.stringOption(short: "o",
 						long: "output",
-						description: "Output file pattern (A*B.txt -> A1B.txt, A2B.txt)") { output = $0 }
+						description: "Output file pattern (A%B.txt -> A1B.txt, A2B.txt)") { output = $0 }
+	parser.boolOption(short: "h",
+					  long: "help",
+					  description: "Print help") { help = $0 }
 	_ = try parser.parse()
+	
+	if help {
+		print("USAGE: Share split <options>\n")
+		print(parser.usage())
+		return
+	}
 	
 	guard let realCount = count else {
 		print("Missing count\n")
@@ -79,8 +89,9 @@ func split() throws {
 		print(parser.usage())
 		return
 	}
-	guard realOutput.contains("*") else {
+	guard realOutput.contains("%") else {
 		print("Invalid output format\n")
+		print(realOutput)
 		return
 	}
 	guard let realSecurity = security else {
@@ -97,10 +108,16 @@ func merge() throws {
 	let parser = ArgumentParser(strict: true)
 	parser.stringOption(short: "o",
 						long: "output",
-						description: "") { output = $0 }
-	let files = try parser.parse()
+						description: "Output file") { output = $0 }
+	let files = try parser.parse().dropFirst()
 	
-	try merge(Array(files.dropFirst()), output)
+	if files.isEmpty {
+		print("Usage: Share merge <options> <input...>\n")
+		print(parser.usage())
+		return
+	}
+	
+	try merge(Array(files), output)
 }
 
 func split(_ count: Int, _ needed: Int,  _ security: Int, _ input: String, _ output: String) throws {
@@ -109,7 +126,7 @@ func split(_ count: Int, _ needed: Int,  _ security: Int, _ input: String, _ out
 	
 	let parts = Part.split(bytes: inputBytes, primeBits: security, count: count, needed: needed)
 	try parts.enumerated().forEach { (index, part) in
-		let output = output.replacingOccurrences(of: "*", with: "\(index+1)")
+		let output = output.replacingOccurrences(of: "%", with: "\(index+1)")
 		let fileContents = """
 		- Index -
 		\(index+1)
@@ -181,7 +198,9 @@ func merge(_ input: [String], _ output: String?) throws {
 						values: bytes)
 		}
 	
-	guard let secretBytes = Part.join(shares: parts) else { throw ShareError.Error("Cannot join") }
+	guard let secretBytes = Part.join(shares: parts) else {
+		throw ShareError.Error("Cannot join")
+	}
 	let data = Data(secretBytes)
 	
 	if let output = output {
@@ -195,6 +214,8 @@ do {
 	try main()
 } catch let e as ParseError {
 	print(e.description)
+} catch let e as ShareError {
+	print(e.localizedDescription)
 } catch let e {
 	print(e.localizedDescription)
 }

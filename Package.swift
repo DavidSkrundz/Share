@@ -24,7 +24,9 @@ let package = Package(
 		.package(url: "https://github.com/DavidSkrundz/CommandLine.git",
 				 .upToNextMinor(from: "1.3.0")),
 		.package(url: "https://github.com/DavidSkrundz/LibC.git",
-				 .upToNextMinor(from: "1.1.0"))
+				 .upToNextMinor(from: "1.1.0")),
+		.package(url: "https://github.com/DavidSkrundz/Math.git",
+				 .upToNextMinor(from: "1.0.0"))
 	],
 	targets: [
 		.target(
@@ -32,7 +34,7 @@ let package = Package(
 			dependencies: ["ShareLib", "CommandLine", "Generator"]),
 		.target(
 			name: "ShareLib",
-			dependencies: ["LibC"]),
+			dependencies: ["LibC", "Math"]),
 		.testTarget(
 			name: "ShareLibTests",
 			dependencies: ["ShareLib"])

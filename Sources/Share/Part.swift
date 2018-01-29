@@ -4,6 +4,7 @@
 //
 
 import ShareLib
+import Math
 
 struct Part {
 	var primeBits: Int
@@ -21,16 +22,17 @@ struct Part {
 	static func split(bytes: [UInt8],
 					  primeBits: Int,
 					  count: Int, needed: Int) -> [Part] {
-		let bytes = bytes.toNbit(primeBits - 1)
+		let bytes: [UInt64] = bytes.asBigEndian(sourceBits: 8,
+												resultBits: primeBits - 1)
 		let prime = self.prime(of: primeBits)
 		let shares = bytes.map {
 			Share.split(value: $0, prime: prime,
 						count: UInt64(count), needed: UInt64(needed))
 		}
 		return (0..<count).map { index in
-			let data = shares.flatMap { shareList in
+			let data: [UInt8] = shares.flatMap { shareList in
 				shareList[index].value
-			}.fromNbit(primeBits)
+			}.asBigEndian(sourceBits: primeBits, resultBits: 8)
 			return Part(primeBits: primeBits,
 						index: index+1, count: count,
 						values: data)
@@ -46,7 +48,7 @@ struct Part {
 		let primeBits = shares[0].primeBits
 		let prime = self.prime(of: primeBits)
 		
-		let data = shares.map { ($0.index, $0.values.toNbit(primeBits)) }
+		let data: [(Int, [UInt64])] = shares.map { ($0.index, $0.values.asBigEndian(sourceBits: 8, resultBits: primeBits)) }
 		let newShares = (0..<data[0].1.count).map { index in
 			data
 				.map { ($0.0, $0.1[index]) }
@@ -56,7 +58,7 @@ struct Part {
 		
 		let realSecret = secret.flatMap { $0 }
 		guard realSecret.count == secret.count else { return nil }
-		return realSecret.fromNbit(primeBits - 1)
+		return realSecret.asBigEndian(sourceBits: primeBits - 1, resultBits: 8)
 	}
 	
 	private static func prime(of bits: Int) -> UInt64 {
