@@ -148,7 +148,7 @@ func merge(_ input: [String], _ output: String?) throws {
 	let testIn = try input.map {
 		String(data: try Data(contentsOf: URL(fileURLWithPath: $0)), encoding: .utf8)
 	}
-	let realInput = testIn.flatMap { $0 }
+	let realInput = testIn.compactMap { $0 }
 	guard testIn.count == realInput.count else { throw ShareError.Error("Could not read a file") }
 	
 	let parts = try realInput

@@ -30,9 +30,8 @@ struct Part {
 						count: UInt64(count), needed: UInt64(needed))
 		}
 		return (0..<count).map { index in
-			let data: [UInt8] = shares.flatMap { shareList in
-				shareList[index].value
-			}.asBigEndian(sourceBits: primeBits, resultBits: 8)
+			let data: [UInt8] = shares.map { $0[index].value }
+				.asBigEndian(sourceBits: primeBits, resultBits: 8)
 			return Part(primeBits: primeBits,
 						index: index+1, count: count,
 						values: data)
@@ -50,13 +49,12 @@ struct Part {
 		
 		let data: [(Int, [UInt64])] = shares.map { ($0.index, $0.values.asBigEndian(sourceBits: 8, resultBits: primeBits)) }
 		let newShares = (0..<data[0].1.count).map { index in
-			data
-				.map { ($0.0, $0.1[index]) }
+			data.map { ($0.0, $0.1[index]) }
 				.map { Share(index: UInt64($0.0), value: $0.1) }
 		}
 		let secret = newShares.map { Share.join(shares: $0, prime: prime) }
 		
-		let realSecret = secret.flatMap { $0 }
+		let realSecret = secret.compactMap { $0 }
 		guard realSecret.count == secret.count else { return nil }
 		return realSecret.asBigEndian(sourceBits: primeBits - 1, resultBits: 8)
 	}
