@@ -41,14 +41,15 @@ func split() throws {
 					 description: "Number of parts needed") { needed = $0 }
 	parser.intOption(short: "s",
 					 long: "security",
-					 description: "The security level (0,1,2,3,4,9)") {
+					 description: "The security level (0,1,2,3,4,5,9)") {
 						switch $0 {
 							case 0: security = 7
 							case 1: security = 13
 							case 2: security = 17
 							case 3: security = 19
 							case 4: security = 31
-							case 9: security = 61
+							case 5: security = 61
+							case 9: security = 89
 							default: print("Invalid security: \($0)")
 						}
 	}

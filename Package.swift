@@ -1,4 +1,4 @@
-// swift-tools-version:4.1
+// swift-tools-version:4.2
 //
 //  Package.swift
 //  Share
@@ -23,18 +23,18 @@ let package = Package(
 	],
 	dependencies: [
 		.package(url: "https://github.com/DavidSkrundz/Collections.git",
-				 .upToNextMinor(from: "1.1.0")),
+				 .upToNextMinor(from: "1.2.0")),
 		.package(url: "https://github.com/DavidSkrundz/CommandLine.git",
-				 .upToNextMinor(from: "1.4.0")),
+				 .upToNextMinor(from: "1.5.0")),
 		.package(url: "https://github.com/DavidSkrundz/LibC.git",
-				 .upToNextMinor(from: "1.2.1")),
+				 .upToNextMinor(from: "1.3.0")),
 		.package(url: "https://github.com/DavidSkrundz/Math.git",
-				 .upToNextMinor(from: "1.1.0"))
+				 .upToNextMinor(from: "1.4.0"))
 	],
 	targets: [
 		.target(
 			name: "Share",
-			dependencies: ["ShareLib", "CommandLine", "Generator"]),
+			dependencies: ["ShareLib", "CommandLine", "Generator", "Math"]),
 		.target(
 			name: "ShareLib",
 			dependencies: ["LibC", "Math"]),

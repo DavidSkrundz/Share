@@ -6,7 +6,7 @@
 import LibC
 import Math
 
-public struct Share<T: FixedWidthInteger> where T.Stride: SignedInteger {
+public struct Share<T: FiniteFieldInteger> {
 	public let index: T
 	public let value: T
 	
@@ -15,30 +15,22 @@ public struct Share<T: FixedWidthInteger> where T.Stride: SignedInteger {
 		self.value = value
 	}
 	
-	public static func split(value: T, prime: T, count: T, needed: T) -> [Share] {
-		let coef = (T(1)..<count).map { _ in T.random(max: prime) }
+	public static func split(value: T, count: Int, needed: Int) -> [Share] {
+		if count >= T.Order { fatalError("Cannot produce more shares than the modulus") }
+		let coef = (1..<count).map { _ in T.random() }
 		var shares = [Share]()
-		for x in (T(1)...count) {
+		for x in (1...count) {
 			var accumulator = value
 			for exp in 1..<needed {
-				accumulator = accumulator
-					.adding(coef[Int(truncatingIfNeeded: exp-1)]
-						.multiplying(T(x)
-							.exponentiating(by: T(exp),
-								 modulo: prime),
-							 modulo: prime),
-						 modulo: prime)
+				accumulator += coef[Int(exp-1)] * T(x).exponentiating(by: T(exp))
 			}
-			let share = Share(index: T(x),
-							  value: accumulator)
+			let share = Share(index: T(x), value: accumulator)
 			shares.append(share)
 		}
 		return shares
 	}
 	
-	public static func join(shares: [Share], prime: T) -> T? {
-		guard shares.count > 0 else { return  nil }
-		
+	public static func join<S: RandomAccessCollection>(shares: S) -> T where S.Element == Share, S.Index == Int {
 		var accum: T = 0
 		for formula in 0..<shares.count {
 			var numerator = T(1)
@@ -47,25 +39,10 @@ public struct Share<T: FixedWidthInteger> where T.Stride: SignedInteger {
 				if formula == count { continue }
 				let startposition = shares[formula].index
 				let nextposition = shares[count].index
-				numerator = numerator
-					.multiplying(T(0)
-						.subtracting(nextposition,
-							 modulo: prime),
-						 modulo: prime)
-				denominator = denominator
-					.multiplying(startposition
-						.subtracting(nextposition,
-							 modulo: prime),
-						 modulo: prime)
+				numerator *= T(0) - nextposition
+				denominator *= startposition - nextposition
 			}
-			guard let inv = denominator.inverse(modulo: prime) else { return nil }
-			accum = prime
-				.adding(accum, modulo: prime)
-				.adding(shares[formula].value
-					.multiplying(numerator, modulo: prime)
-					.multiplying(inv,
-						 modulo: prime),
-					 modulo: prime)
+			accum += shares[formula].value * numerator / denominator
 		}
 		return accum
 	}
