@@ -2,13 +2,13 @@
 
 [![](https://img.shields.io/badge/Swift-4.2-orange.svg)][1]
 [![](https://img.shields.io/badge/os-macOS%20|%20Linux-lightgray.svg)][1]
-[![](https://travis-ci.com/DavidSkrundz/Math.svg?branch=master)][2]
-[![]()][3]
+[![](https://travis-ci.com/DavidSkrundz/Share.svg?branch=master)][2]
+[![](https://codebeat.co/badges/3a65d86f-2c2e-4c74-ac69-831d95e34b90)][3]
 [![](https://codecov.io/gh/DavidSkrundz/Share/branch/master/graph/badge.svg)][4]
 
 [1]: https://swift.org/download/#releases
 [2]: https://travis-ci.com/DavidSkrundz/Share
-[3]: 
+[3]: https://codebeat.co/projects/github-com-davidskrundz-share-master
 [4]: https://codecov.io/gh/DavidSkrundz/Share
 
 Shamir's Secret Sharing
